@@ -68,7 +68,6 @@ function cityWeather(){
 function fiveDay(){
     apiURL = apiURL.replace("/weather", "/forecast");
     apiURL += "&cnt=5";
-    console.log(apiURL)
     fetch(apiURL).then(
         (response) => {return response.json();})
         .then(data => {
