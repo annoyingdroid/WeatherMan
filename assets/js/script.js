@@ -10,11 +10,17 @@ var currentTime;
 var date = new Date();
 var weatherData = [''];
 
-navigator.geolocation.getCurrentPosition(onSuccess, onError);
+myLocation();
+
+function myLocation() {
+    navigator.geolocation.getCurrentPosition(onSuccess, onError);
+}
 
 //Check if browser supports geolocation
-if (!navigator.geolocation) {
-    console.error(`Your browser doesn't support Geolocation`);
+function onError(){
+    if (!navigator.geolocation) {
+        console.error(`Your browser doesn't support Geolocation`);
+    }
 }
 
 //On success, return current coordinates
@@ -61,7 +67,7 @@ function cityWeather(){
 function fiveDay(){
     apiURL = apiURL.replace("/weather", "/forecast");
     apiURL += "&cnt=5";
-    console.log(apiURL);
+    console.log(apiURL)
     fetch(apiURL).then(
         (response) => {return response.json();})
         .then(data => {
@@ -82,6 +88,63 @@ function fiveDay(){
         });
 }
 
-//Saved locations
+//General Search
+function citySearch(){
+    var city = $("#search").val();
+    if(city == null || city == "" || city == " ")
+    {
+        //Modal pop up
+    } else {
+        saveCity(city);
+        nameSearchURL = "https://api.openweathermap.org/data/2.5/weather?q="+ city +"&exclude=minutely,hourly,alerts&appid=3a5933df423b838589a35a8bafd45825";
+        fetch(nameSearchURL).then(
+            (response) => {return response.json();})
+            .then(data => {
+                coordSearch(data.coord);
+        })
+    }
+}
 
-//Eventlisteners
+function coordSearch(coords){
+    locLat = Math.round((coords.lat + Number.EPSILON) * 100) / 100;
+    locLon = Math.round((coords.lon + Number.EPSILON) * 100) / 100;
+    apiURL = "https://api.openweathermap.org/data/2.5/weather?lat="+locLat+"&lon="+locLon+"&exclude=minutely,hourly,alerts&appid="+apiKey;
+    uviURL = "https://api.openweathermap.org/data/2.5/uvi?lat="+locLat+"&lon="+locLon+"&appid="+apiKey;
+    cityWeather();
+    fiveDay();
+}
+
+//Saved locations
+function saveCity(city){
+    localStorage.setItem(city, city);
+}
+
+function recentSearches(){
+    var cities = allStorage();
+    if(cities.length > 0) {
+        for(var j=0;j<cities.length;j++) {
+            console.log()
+            $("#myLocations").append(cities[j]);
+        }
+    }
+}
+
+function allStorage() {
+
+    var values = [],
+        keys = Object.keys(localStorage),
+        i = keys.length;
+
+    while ( i-- ) {
+        values.push( localStorage.getItem(keys[i]) );
+    }
+
+    return values;
+}
+
+document.getElementById("search-addon").addEventListener("click", function(){
+    $('.fiveDayForecast').empty();
+    $('#weatherIcon').empty();
+    date = new Date();
+    citySearch();
+}); 
