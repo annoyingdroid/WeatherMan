@@ -11,6 +11,7 @@ var date = new Date();
 var weatherData = [''];
 
 myLocation();
+loadCities();
 
 function myLocation() {
     navigator.geolocation.getCurrentPosition(onSuccess, onError);
@@ -116,30 +117,26 @@ function coordSearch(coords){
 
 //Saved locations
 function saveCity(city){
+    if(localStorage.getItem(city) == null)
+    {
     localStorage.setItem(city, city);
-}
-
-function recentSearches(){
-    var cities = allStorage();
-    if(cities.length > 0) {
-        for(var j=0;j<cities.length;j++) {
-            console.log()
-            $("#myLocations").append(cities[j]);
-        }
+    $("#myLocations").append(`
+        <li>
+            <button type="button" class="btn btn-light d-inline">`+ city +`</button>
+        </li>
+    `);
     }
 }
 
-function allStorage() {
-
-    var values = [],
-        keys = Object.keys(localStorage),
-        i = keys.length;
-
-    while ( i-- ) {
-        values.push( localStorage.getItem(keys[i]) );
+function loadCities() {
+    var keys = Object.keys(localStorage);
+    for(var k=keys.length; k>0; k--){
+        $("#myLocations").append(`
+        <li>
+            <button type="button" class="btn btn-light d-inline">`+ localStorage.getItem(keys[k]) +`</button>
+        </li>
+    `);
     }
-
-    return values;
 }
 
 document.getElementById("search-addon").addEventListener("click", function(){
@@ -148,3 +145,13 @@ document.getElementById("search-addon").addEventListener("click", function(){
     date = new Date();
     citySearch();
 }); 
+
+$('.btn-light').on('click', function(event){
+    var city = $(this).closest(".btn-light").text();
+
+    $("#search").val(city);
+    $('.fiveDayForecast').empty();
+    $('#weatherIcon').empty();
+    date = new Date();
+    citySearch();
+});
